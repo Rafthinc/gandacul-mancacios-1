@@ -5,6 +5,9 @@ import { useState, useRef, useEffect } from "react";
 const sizes = { width: 800, height: 600 };
 
 class AppleGameScene extends Phaser.Scene {
+  private hearts!: Phaser.GameObjects.Group;
+  private lives: number = 3;
+  private car!: Phaser.GameObjects.Sprite;
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private foodItems!: Phaser.Physics.Arcade.Group;
@@ -29,6 +32,12 @@ class AppleGameScene extends Phaser.Scene {
     this.load.image("gandac", "/assets/gandac.png");
     this.load.image("gandac_fericit", "/assets/gandac_fericit.png");
     this.load.image("gandac_bolnav", "/assets/gandac_bolnav.png");
+    // Incarcam fazele masinii
+    this.load.image("car_0", "/assets/car_0.png");
+    this.load.image("car_1", "/assets/car_1.png");
+    this.load.image("car_2", "/assets/car_2.png");
+    this.load.image("car_3", "/assets/car_3.png");
+    this.load.image("car_4", "/assets/car_4.png");
 
     // Încărcăm alimentele
     this.foodTypes.forEach((food) => {
@@ -40,6 +49,12 @@ class AppleGameScene extends Phaser.Scene {
     const { width, height } = this.scale;
     // Fundalul se adaptează acum la orice mărime de ecran
     this.add.image(0, 0, "bg").setOrigin(0, 0).setDisplaySize(width, height);
+
+    // MASINA (Progresul vizual tip Turmoil)
+    // O plasăm în fundal, undeva pe blatul bucătăriei
+    this.car = this.add.sprite(width - 150, height - 150, "car_0");
+    this.car.setAlpha(0.5); // Apare ca o "schiță" la început
+    this.car.setDisplaySize(180, 100);
 
     // Jucătorul (Gândacul)
     this.player = this.physics.add.sprite(
@@ -126,6 +141,7 @@ class AppleGameScene extends Phaser.Scene {
     this.textScore.setText(`Scor: ${this.points}`);
 
     // SCHIMBARE IMAGINE GÂNDAC
+    if (!isHealthy) this.cameras.main.shake(200, 0.02);
     const textureKey = isHealthy ? "gandac_fericit" : "gandac_bolnav";
     this.player.setTexture(textureKey);
 
