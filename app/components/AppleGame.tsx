@@ -37,22 +37,21 @@ class AppleGameScene extends Phaser.Scene {
   }
 
   create() {
-    this.add
-      .image(0, 0, "bg")
-      .setOrigin(0, 0)
-      .setDisplaySize(sizes.width, sizes.height);
+    const { width, height } = this.scale;
+    // Fundalul se adaptează acum la orice mărime de ecran
+    this.add.image(0, 0, "bg").setOrigin(0, 0).setDisplaySize(width, height);
 
     // Jucătorul (Gândacul)
     this.player = this.physics.add.sprite(
       sizes.width / 2,
-      sizes.height - 60,
+      sizes.height - 80,
       "gandac",
     );
     this.player.setImmovable(true);
     this.player.body.allowGravity = false;
     this.player.setCollideWorldBounds(true);
     // Ajustăm mărimea gândacului dacă e necesar
-    this.player.setDisplaySize(180, 80);
+    this.player.setDisplaySize(120, 120);
 
     this.foodItems = this.physics.add.group();
 
@@ -107,7 +106,7 @@ class AppleGameScene extends Phaser.Scene {
     const food = this.foodItems.create(x, 0, type.key);
     food.setData("points", type.points);
     food.setData("isHealthy", type.isHealthy);
-    food.setDisplaySize(60, 60);
+    food.setDisplaySize(80, 80);
   }
 
   collectFood(player: any, food: any) {
@@ -159,8 +158,10 @@ export default function AppleGame() {
       width: sizes.width,
       height: sizes.height,
       scale: {
-        mode: Phaser.Scale.FIT, // Cuprinde ecranul
+        mode: Phaser.Scale.ENVELOP, // Cuprinde ecranul
         autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: window.innerWidth, // Folosim lățimea reală a ferestrei
+        height: window.innerHeight,
       },
       physics: { default: "arcade", arcade: { gravity: { x: 0, y: 300 } } },
       scene: AppleGameScene,
