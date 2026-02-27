@@ -3,24 +3,50 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --dkClr: #181818;
+  --liClr: whitesmoke;
+  --accClr: #0d0d35;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--dkClr);
+  color: var(--liClr);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header,
+footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+main {
+  flex: 1;
+  display: flex;
+}
+
+#gameCanvas {
+  border: 2px solid #00ff00; /* Verde pentru ADHD focus */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  z-index: 1;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
 }
