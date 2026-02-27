@@ -197,37 +197,38 @@ export default function AppleGame() {
   };
 
   return (
-    <div className="relative w-full h-screen bg-black flex items-center justify-center overflow-hidden">
+    // Folosim fixed inset-0 pentru a acoperi tot ecranul telefonului fără scroll
+    <div className="fixed inset-0 w-full h-full bg-black overflow-hidden touch-none">
       {/* 1. Ecran de START (Overlay) */}
       {gameState === "START" && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/90 text-white">
-          <h1 className="text-4xl mb-8 font-bold text-green-400">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/90 text-white p-4">
+          <h1 className="text-4xl md:text-6xl mb-8 font-bold text-green-400 text-center">
             apps4mind: Nutriție ADHD
           </h1>
           <button
             onClick={handleStart}
-            className="px-10 py-4 bg-green-600 hover:bg-green-500 rounded-full text-2xl transition-all transform hover:scale-110"
+            className="px-10 py-4 bg-green-600 hover:bg-green-500 rounded-full text-2xl transition-all transform active:scale-95"
           >
             START JOC
           </button>
         </div>
       )}
 
-      {/* 2. Containerul Jocului Phaser */}
+      {/* 2. Containerul Jocului - Fără clase de centrare pentru a lăsa Phaser.Scale.ENVELOP să lucreze */}
       <div ref={gameContainerRef} className="w-full h-full" />
 
-      {/* 3. Butoane de Control (HUD) */}
+      {/* 3. Butoane de Control (HUD) - Le punem absolute peste joc */}
       {gameState !== "START" && (
-        <div className="absolute top-4 right-4 z-10 flex gap-4">
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
           <button
             onClick={togglePause}
-            className="p-2 bg-white/20 hover:bg-white/40 rounded backdrop-blur-md text-white min-w-[80px]"
+            className="px-3 py-1 bg-white/20 hover:bg-white/40 rounded backdrop-blur-sm text-white text-sm"
           >
             {gameState === "PAUSED" ? "RESUME" : "PAUSE"}
           </button>
           <button
             onClick={handleExit}
-            className="p-2 bg-red-600/50 hover:bg-red-600 rounded backdrop-blur-md text-white"
+            className="px-3 py-1 bg-red-600/50 hover:bg-red-600 rounded backdrop-blur-sm text-white text-sm"
           >
             EXIT
           </button>
