@@ -100,12 +100,20 @@ class AppleGameScene extends Phaser.Scene {
   }
 
   spawnFood() {
-    const x = Phaser.Math.Between(40, sizes.width - 40);
-    const type = Phaser.Utils.Array.GetRandom(this.foodTypes);
+    // Luăm lățimea curentă a ecranului calculată de Phaser pentru acest dispozitiv
+    const currentWidth = this.scale.width;
 
-    const food = this.foodItems.create(x, 0, type.key);
+    // Calculăm o zonă de siguranță (padding) pentru ca alimentele să nu cadă fix pe margine
+    const padding = 60;
+    const x = Phaser.Math.Between(padding, currentWidth - padding);
+
+    const type = Phaser.Utils.Array.GetRandom(this.foodTypes);
+    const food = this.foodItems.create(x, -50, type.key); // Începe puțin mai sus de ecran
+
     food.setData("points", type.points);
     food.setData("isHealthy", type.isHealthy);
+
+    // Setăm dimensiunea mărită pentru vizibilitate pe mobil
     food.setDisplaySize(80, 80);
   }
 
