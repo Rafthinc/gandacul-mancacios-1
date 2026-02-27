@@ -163,15 +163,17 @@ export default function AppleGame() {
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
       parent: gameContainerRef.current || undefined,
-      width: sizes.width,
-      height: sizes.height,
+      // Sincronizăm rezoluția cu fereastra browserului la start
+      width: window.innerWidth,
+      height: window.innerHeight,
       scale: {
-        mode: Phaser.Scale.ENVELOP, // Cuprinde ecranul
+        mode: Phaser.Scale.ENVELOP,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: window.innerWidth, // Folosim lățimea reală a ferestrei
-        height: window.innerHeight,
       },
-      physics: { default: "arcade", arcade: { gravity: { x: 0, y: 300 } } },
+      physics: {
+        default: "arcade",
+        arcade: { gravity: { x: 0, y: 300 } },
+      },
       scene: AppleGameScene,
     };
 
