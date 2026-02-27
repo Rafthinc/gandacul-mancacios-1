@@ -43,7 +43,6 @@ class AppleGameScene extends Phaser.Scene {
     this.load.audio("muzica_bg", "/assets/sunete/muzica_fundal.mp3");
     this.load.audio("sunet_fail", "/assets/sunete/pierde_viata.mp3");
     this.load.audio("car_construction", "/assets/sunete/car_construction.mp3");
-    this.load.audio("pierde_viata", "/assets/sunete/pierde_viata.mp3");
     this.load.audio("game_over", "/assets/sunete/Game End.mp3");
     this.load.audio("move_car", "/assets/sunete/move_car.ogg");
     this.load.audio("yaay", "/assets/sunete/yaay.mp3");
@@ -432,16 +431,28 @@ export default function AppleGame() {
     <div className="fixed inset-0 w-full h-full bg-black overflow-hidden touch-none">
       {/* 1. Ecran de START (Overlay) */}
       {gameState === "START" && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/90 text-white p-4">
-          <h1 className="text-4xl md:text-6xl mb-8 font-bold text-green-400 text-center">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/95 text-white p-6 text-center">
+          {/* Titlul cu spațiere generoasă jos (mb-12) */}
+          <h1 className="text-5xl md:text-7xl mb-12 font-extrabold tracking-tight text-green-400 drop-shadow-lg">
             apps4mind: Nutriție ADHD
           </h1>
+
+          {/* Butonul stilizat cu efecte de hover și shadow */}
           <button
             onClick={handleStart}
-            className="px-10 py-4 bg-green-600 hover:bg-green-500 rounded-full text-2xl transition-all transform active:scale-95"
+            className="px-16 py-6 min-w-70 bg-green-600 hover:bg-green-500 
+    rounded-full text-3xl font-bold text-white
+    transition-all duration-300 transform 
+    hover:scale-105 active:scale-95
+    shadow-xl hover:shadow-green-500/50
+  "
           >
             START JOC
           </button>
+
+          <p className="mt-8 text-slate-400 text-lg animate-pulse">
+            Atinge butonul pentru a începe construcția mașinii
+          </p>
         </div>
       )}
 
