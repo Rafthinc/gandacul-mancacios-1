@@ -38,6 +38,15 @@ class AppleGameScene extends Phaser.Scene {
     this.load.image("car_2", "/assets/car_2.png");
     this.load.image("car_3", "/assets/car_3.png");
     this.load.image("car_4", "/assets/car_4.png");
+    this.load.image("inima", "/assets/inima.png");
+
+    this.load.audio("muzica_bg", "/assets/sunete/muzica_fundal.mp3");
+    this.load.audio("sunet_fail", "/assets/sunete/pierde_viata.mp3");
+    this.load.audio("car_construction", "/assets/sunete/car_construction.mp3");
+    this.load.audio("pierde_viata", "/assets/sunete/pierde_viata.mp3");
+    this.load.audio("game_over", "/assets/sunete/Game End.mp3");
+    this.load.audio("move_car", "/assets/sunete/move_car.ogg");
+    this.load.audio("yaay", "/assets/sunete/yaay.mp3");
 
     // Încărcăm alimentele
     this.foodTypes.forEach((food) => {
@@ -50,11 +59,37 @@ class AppleGameScene extends Phaser.Scene {
     // Fundalul se adaptează acum la orice mărime de ecran
     this.add.image(0, 0, "bg").setOrigin(0, 0).setDisplaySize(width, height);
 
+    // Adăugăm sunetul în scenă
+    const bgMusic = this.sound.add("muzica_bg", {
+      volume: 0.5,
+      loop: true,
+    });
+
+    // Pornim muzica
+    // NOTĂ: Browserele moderne cer un click/interacțiune înainte de a lăsa sunetul să pornească
+    bgMusic.play();
+
+    // 1. Creăm un fundal circular pentru mașină (UI Background)
+    const circleUI = this.add.graphics();
+    circleUI.fillStyle(0xffffff, 0.8); // Alb semi-transparent
+    circleUI.fillCircle(100, 100, 70); // Poziție (100, 100) cu rază de 70
+    circleUI.lineStyle(4, 0x00ff00, 1); // Bordură verde pentru ADHD focus
+    circleUI.strokeCircle(100, 100, 70);
+
     // MASINA (Progresul vizual tip Turmoil)
     // O plasăm în fundal, undeva pe blatul bucătăriei
-    this.car = this.add.sprite(width - 150, height - 150, "car_0");
-    this.car.setAlpha(0.5); // Apare ca o "schiță" la început
+    this.car = this.add.sprite(100, 100, "car_0");
+    this.car.setAlpha(0.7); // Apare ca o "schiță" la început
     this.car.setDisplaySize(180, 100);
+
+    // INIMI (Sistemul de vieți)
+    this.hearts = this.add.group();
+    // Buclele for trebuie să fie obligatoriu în interiorul create()
+    for (let i = 0; i < 3; i++) {
+      const x = width - 40 - i * 45;
+      const heart = this.add.sprite(x, 40, "inima").setDisplaySize(65, 65);
+      this.hearts.add(heart);
+    }
 
     // Jucătorul (Gândacul)
     this.player = this.physics.add.sprite(
@@ -140,8 +175,15 @@ class AppleGameScene extends Phaser.Scene {
     if (this.points < 0) this.points = 0;
     this.textScore.setText(`Scor: ${this.points}`);
 
+    if (isHealthy) {
+      this.points += points;
+      this.updateCarProgress();
+    } else {
+      this.loseLife();
+      this.cameras.main.shake(200, 0.02); // Feedback vizual
+    }
+
     // SCHIMBARE IMAGINE GÂNDAC
-    if (!isHealthy) this.cameras.main.shake(200, 0.02);
     const textureKey = isHealthy ? "gandac_fericit" : "gandac_bolnav";
     this.player.setTexture(textureKey);
 
@@ -151,6 +193,169 @@ class AppleGameScene extends Phaser.Scene {
     });
 
     food.destroy();
+  }
+
+  loseLife() {
+    this.lives--;
+    this.sound.play("sunet_fail");
+    const heartArray = this.hearts.getChildren() as Phaser.GameObjects.Sprite[];
+    if (heartArray[this.lives]) {
+      heartArray[this.lives].setTint(0x333333); // Inima devine gri
+      heartArray[this.lives].setAlpha(0.5);
+    }
+
+    if (this.lives <= 0) {
+      this.gameOver();
+    }
+  }
+
+  updateCarProgress() {
+    let changed = false;
+
+    // Verificăm pragurile de la cel mai mare la cel mai mic
+    // și adăugăm verificarea texturii actuale pentru a evita redundanța
+    if (this.points >= 200 && this.car.texture.key !== "car_4") {
+      this.car.setTexture("car_4");
+      this.car.setAlpha(1);
+      changed = true;
+      this.levelComplete();
+    } else if (
+      this.points >= 150 &&
+      this.points < 200 &&
+      this.car.texture.key !== "car_3"
+    ) {
+      this.car.setTexture("car_3");
+      this.car.setAlpha(0.9);
+      changed = true;
+    } else if (
+      this.points >= 100 &&
+      this.points < 150 &&
+      this.car.texture.key !== "car_2"
+    ) {
+      this.car.setTexture("car_2");
+      this.car.setAlpha(0.8);
+      changed = true;
+    } else if (
+      this.points >= 60 &&
+      this.points < 100 &&
+      this.car.texture.key !== "car_1"
+    ) {
+      this.car.setTexture("car_1");
+      this.car.setAlpha(0.7);
+      changed = true;
+    }
+
+    // Dacă s-a schimbat faza, activăm efectele vizuale
+    if (changed) {
+      // 1. Pulsare (Scale Up/Down)
+      this.sound.play("car_construction");
+      this.tweens.add({
+        targets: this.car,
+        scale: { from: 0.1, to: 0.3 }, // Ajustează valorile în funcție de displaySize
+        duration: 300,
+        yoyo: true,
+        ease: "Back.easeOut",
+      });
+
+      // 2. Mic cutremur local (Shake) pentru atenție
+      this.tweens.add({
+        targets: this.car,
+        x: "+=5",
+        y: "+=5",
+        duration: 50,
+        repeat: 5,
+        yoyo: true,
+      });
+    }
+  }
+
+  levelComplete() {
+    // 1. Oprim fizica pentru a nu mai cădea alimente în timpul animației de final
+    this.physics.pause();
+    this.time.removeAllEvents();
+    this.sound.play("yaay");
+    this.sound.play("move_car");
+
+    // 2. Facem flip pe axa X (Oglindire)
+    // Presupunem că mașina ta privește spre stânga implicit.
+    // Dacă privește spre dreapta, pune false.
+    this.car.setFlipX(true);
+
+    // 3. Animația de plecare
+    // Putem adăuga un mic efect de "pregătire" (stretch) înainte de start
+    this.tweens.add({
+      targets: this.car,
+      scaleX: 0.4, // Se lungește puțin
+      duration: 200,
+      yoyo: true,
+      onComplete: () => {
+        // Plecarea propriu-zisă spre marginea ecranului
+        this.tweens.add({
+          targets: this.car,
+          x: this.scale.width + 300, // Iese din ecran prin dreapta
+          duration: 2000,
+          ease: "Power2.easeIn",
+          onComplete: () => {
+            // Aici poți apela ecranul de succes sau următorul nivel
+            console.log("Nivel finalizat!");
+          },
+        });
+
+        // Gândacul urcă și el (sau dispare în mașină)
+        this.tweens.add({
+          targets: this.player,
+          x: this.scale.width + 300,
+          alpha: 0,
+          duration: 2000,
+          ease: "Power2.easeIn",
+        });
+      },
+    });
+  }
+
+  gameOver() {
+    // 1. Oprim fizica și evenimentele de generare a alimentelor
+    this.physics.pause();
+    this.time.removeAllEvents();
+
+    // 2. Schimbăm imaginea gândacului în cea de "bolnav" pentru feedback vizual
+    this.player.setTexture("gandac_bolnav");
+    this.player.setTint(0xff0000); // Îl facem roșiatic pentru accentuarea eșecului
+
+    // 3. Adăugăm un text mare de Game Over în mijlocul ecranului
+    const { width, height } = this.scale;
+
+    this.add
+      .text(width / 2, height / 2 - 50, "GAME OVER", {
+        font: "bold 60px Arial",
+        color: "#ff0000",
+        stroke: "#000000",
+        strokeThickness: 6,
+      })
+      .setOrigin(0.5);
+
+    this.add
+      .text(width / 2, height / 2 + 20, `Scor final: ${this.points}`, {
+        font: "30px Arial",
+        color: "#ffffff",
+      })
+      .setOrigin(0.5);
+
+    // 4. Instrucțiune pentru restart (simplu deocamdată)
+    const restartText = this.add
+      .text(width / 2, height / 2 + 80, "Apasă pentru Restart", {
+        font: "20px Arial",
+        color: "#00ff00",
+      })
+      .setOrigin(0.5);
+
+    // Facem ecranul interactiv pentru a reporni jocul
+    this.input.once("pointerdown", () => {
+      // Oprește absolut toate sunetele care rulează în acest moment (muzică fundal + efecte)
+      this.sound.stopAll();
+      this.scene.restart();
+      this.points = 0; // Resetăm punctele manual dacă e nevoie
+    });
   }
 
   update() {
